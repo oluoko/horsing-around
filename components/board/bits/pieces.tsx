@@ -1,33 +1,57 @@
+"use client";
+
 import { cn } from "@/lib/utils";
+import { copyPosition, createPosition } from "@/hooks/use-position";
+import { useState, useRef, type DragEvent } from "react";
 
 export default function Pieces() {
-  const position = new Array(8).fill(" ").map(() => new Array(8).fill(" "));
+  const ref = useRef<HTMLDivElement>(null);
 
-  for (let i = 0; i < 8; i++) {
-    position[1][i] = "wp";
-    position[6][i] = "bp";
-  }
+  const [position, setPosition] = useState(createPosition());
 
-  position[0][0] = "wr";
-  position[0][1] = "wn";
-  position[0][2] = "wb";
-  position[0][3] = "wq";
-  position[0][4] = "wk";
-  position[0][5] = "wb";
-  position[0][6] = "wn";
-  position[0][7] = "wr";
+  const calculateCoords = (e: DragEvent<HTMLDivElement>) => {
+    const board = ref.current;
 
-  position[7][0] = "br";
-  position[7][1] = "bn";
-  position[7][2] = "bb";
-  position[7][3] = "bq";
-  position[7][4] = "bk";
-  position[7][5] = "bb";
-  position[7][6] = "bn";
-  position[7][7] = "br";
+    if (!board) return;
+
+    const { width, left, top } = board.getBoundingClientRect();
+    const size = width / 8;
+
+    const y = Math.floor((e.clientX - left) / size);
+    const x = 7 - Math.floor((e.clientY - top) / size);
+
+    return { x, y };
+  };
+
+  const onDrop = (e: DragEvent<HTMLDivElement>) => {
+    const newPosition = copyPosition(position);
+    const coords = calculateCoords(e);
+
+    if (!coords) return;
+
+    const { x, y } = coords;
+
+    const [piece, rankValue, fileValue] = e.dataTransfer
+      .getData("text")
+      .split(",");
+    const rank = Number(rankValue);
+    const file = Number(fileValue);
+
+    newPosition[rank][file] = "" as (typeof newPosition)[number][number];
+    newPosition[x][y] = piece as (typeof newPosition)[number][number];
+
+    setPosition(newPosition);
+  };
+
+  const onDragOver = (e: DragEvent<HTMLDivElement>) => e.preventDefault();
 
   return (
-    <div className="pieces absolute left-0 right-0 top-0 bottom-0">
+    <div
+      ref={ref}
+      onDrop={onDrop}
+      onDragOver={onDragOver}
+      className="pieces absolute left-0 right-0 top-0 bottom-0"
+    >
       {position.map((r, rank) =>
         r.map((f, file) => (
           <div key={`${rank}-${file}`}>
@@ -55,6 +79,19 @@ export function Piece({
   file: number;
   piece: string;
 }) {
+  const onDragStart = (e: DragEvent<HTMLDivElement>) => {
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", `${piece}, ${rank},${file}`);
+
+    setTimeout(() => {
+      e.target.style.display = "none";
+    }, 0);
+  };
+
+  const onDragEnd = (e: DragEvent<HTMLDivElement>) => {
+    e.target.style.display = "block";
+  };
+
   return (
     <div
       className={cn(
@@ -63,6 +100,8 @@ export function Piece({
         `p-${file}${rank}`,
       )}
       draggable={true}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
     />
   );
 }

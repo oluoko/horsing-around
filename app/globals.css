@@ -74,8 +74,8 @@
 }
 
 :root {
-  --light-square: #f5fdff;
-  --dark-square: #2d68c4;
+  --light-square: #e8e8d0;
+  --dark-square: #4b7399;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);

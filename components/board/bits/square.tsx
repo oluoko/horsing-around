@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 
-const LIGHT = "#f5fdff";
-const DARK = "#2d68c4";
+const LIGHT = "#E8E8D0";
+const DARK = "#4B7399";
 
 interface SquareProps {
   isDark: boolean;
