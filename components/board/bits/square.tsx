@@ -1,0 +1,36 @@
+import type { CSSProperties } from "react";
+
+const LIGHT = "#f5fdff";
+const DARK = "#2d68c4";
+
+interface SquareProps {
+  isDark: boolean;
+  rankLabel?: number;
+  fileLabel?: string;
+}
+
+export default function Square({ isDark, rankLabel, fileLabel }: SquareProps) {
+  const labelColor = isDark ? LIGHT : DARK;
+  const style: CSSProperties = { backgroundColor: isDark ? DARK : LIGHT };
+
+  return (
+    <div className="relative col-span-1 row-span-1" style={style}>
+      {rankLabel !== undefined && (
+        <span
+          className="absolute top-0.5 left-1 text-xs md:text-lg font-semibold select-none"
+          style={{ color: labelColor }}
+        >
+          {rankLabel}
+        </span>
+      )}
+      {fileLabel && (
+        <span
+          className="absolute top-0.5 right-1 text-xs md:text-lg font-semibold select-none"
+          style={{ color: labelColor }}
+        >
+          {fileLabel}
+        </span>
+      )}
+    </div>
+  );
+}
