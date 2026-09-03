@@ -82,14 +82,15 @@ export function Piece({
   const onDragStart = (e: DragEvent<HTMLDivElement>) => {
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/plain", `${piece}, ${rank},${file}`);
+    const target = e.currentTarget;
 
     setTimeout(() => {
-      e.target.style.display = "none";
+      target.style.display = "none";
     }, 0);
   };
 
   const onDragEnd = (e: DragEvent<HTMLDivElement>) => {
-    e.target.style.display = "block";
+    e.currentTarget.style.display = "block";
   };
 
   return (
