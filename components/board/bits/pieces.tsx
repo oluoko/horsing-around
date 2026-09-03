@@ -2,107 +2,146 @@
 
 import { cn } from "@/lib/utils";
 import { copyPosition, createPosition } from "@/hooks/use-position";
-import { useState, useRef, type DragEvent } from "react";
+import { useRef, useState, type PointerEvent } from "react";
+
+interface DragState {
+  rank: number;
+  file: number;
+  piece: string;
+  x: number;
+  y: number;
+}
 
 export default function Pieces() {
-  const ref = useRef<HTMLDivElement>(null);
-
+  const boardRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState(createPosition());
+  const [drag, setDrag] = useState<DragState | null>(null);
 
-  const calculateCoords = (e: DragEvent<HTMLDivElement>) => {
-    const board = ref.current;
+  const getRelativeCoords = (clientX: number, clientY: number) => {
+    const board = boardRef.current;
+    if (!board) return null;
 
-    if (!board) return;
+    const { left, top } = board.getBoundingClientRect();
+    return { x: clientX - left, y: clientY - top };
+  };
+
+  const getSquare = (clientX: number, clientY: number) => {
+    const board = boardRef.current;
+    if (!board) return null;
 
     const { width, left, top } = board.getBoundingClientRect();
     const size = width / 8;
 
-    const y = Math.floor((e.clientX - left) / size);
-    const x = 7 - Math.floor((e.clientY - top) / size);
+    const file = Math.floor((clientX - left) / size);
+    const rank = 7 - Math.floor((clientY - top) / size);
 
-    return { x, y };
+    return { rank, file };
   };
 
-  const onDrop = (e: DragEvent<HTMLDivElement>) => {
-    const newPosition = copyPosition(position);
-    const coords = calculateCoords(e);
+  const startDrag = (
+    e: PointerEvent<HTMLDivElement>,
+    rank: number,
+    file: number,
+    piece: string,
+  ) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
 
+    const coords = getRelativeCoords(e.clientX, e.clientY);
     if (!coords) return;
 
-    const { x, y } = coords;
+    setDrag({ rank, file, piece, x: coords.x, y: coords.y });
+  };
 
-    const [piece, rankValue, fileValue] = e.dataTransfer
-      .getData("text")
-      .split(",");
-    const rank = Number(rankValue);
-    const file = Number(fileValue);
+  const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
+    if (!drag) return;
 
+    const coords = getRelativeCoords(e.clientX, e.clientY);
+    if (!coords) return;
+
+    setDrag({ ...drag, x: coords.x, y: coords.y });
+  };
+
+  const endDrag = (e: PointerEvent<HTMLDivElement>) => {
+    if (!drag) return;
+
+    const square = getSquare(e.clientX, e.clientY);
+    const { rank, file, piece } = drag;
+
+    setDrag(null);
+
+    if (!square) return;
+    if (square.rank === rank && square.file === file) return;
+
+    const newPosition = copyPosition(position);
     newPosition[rank][file] = "" as (typeof newPosition)[number][number];
-    newPosition[x][y] = piece as (typeof newPosition)[number][number];
+    newPosition[square.rank][square.file] =
+      piece as (typeof newPosition)[number][number];
 
     setPosition(newPosition);
   };
 
-  const onDragOver = (e: DragEvent<HTMLDivElement>) => e.preventDefault();
-
   return (
     <div
-      ref={ref}
-      onDrop={onDrop}
-      onDragOver={onDragOver}
+      ref={boardRef}
+      onPointerMove={onPointerMove}
+      onPointerUp={endDrag}
       className="pieces absolute left-0 right-0 top-0 bottom-0"
     >
       {position.map((r, rank) =>
-        r.map((f, file) => (
-          <div key={`${rank}-${file}`}>
-            {position[rank][file] ? (
-              <Piece
-                key={`${rank}-${file}`}
-                rank={rank}
-                file={file}
-                piece={position[rank][file]}
-              />
-            ) : null}
-          </div>
-        )),
+        r.map((f, file) =>
+          position[rank][file] ? (
+            <Piece
+              key={`${rank}-${file}`}
+              rank={rank}
+              file={file}
+              piece={position[rank][file]}
+              isDragging={drag?.rank === rank && drag?.file === file}
+              dragX={drag?.x}
+              dragY={drag?.y}
+              onPointerDown={startDrag}
+            />
+          ) : null,
+        ),
       )}
     </div>
   );
 }
 
-export function Piece({
+function Piece({
   rank,
   file,
   piece,
+  isDragging,
+  dragX,
+  dragY,
+  onPointerDown,
 }: {
   rank: number;
   file: number;
   piece: string;
+  isDragging: boolean;
+  dragX?: number;
+  dragY?: number;
+  onPointerDown: (
+    e: PointerEvent<HTMLDivElement>,
+    rank: number,
+    file: number,
+    piece: string,
+  ) => void;
 }) {
-  const onDragStart = (e: DragEvent<HTMLDivElement>) => {
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", `${piece}, ${rank},${file}`);
-    const target = e.currentTarget;
-
-    setTimeout(() => {
-      target.style.display = "none";
-    }, 0);
-  };
-
-  const onDragEnd = (e: DragEvent<HTMLDivElement>) => {
-    e.currentTarget.style.display = "block";
-  };
-
   return (
     <div
       className={cn(
-        "piece w-[12.5%] h-[12.5%] absolute bg-center bg-size-[90%] md:bg-size-[100%] bg-no-repeat",
-        `${piece}`,
-        `p-${file}${rank}`,
+        "piece w-[12.5%] h-[12.5%] absolute bg-center bg-size-[90%] md:bg-size-[100%] bg-no-repeat touch-none",
+        piece,
+        isDragging ? "z-50 cursor-grabbing" : `p-${file}${rank} cursor-grab`,
       )}
-      draggable={true}
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
+      style={
+        isDragging && dragX !== undefined && dragY !== undefined
+          ? { left: dragX, top: dragY, transform: "translate(-50%, -50%)" }
+          : undefined
+      }
+      onPointerDown={(e) => onPointerDown(e, rank, file, piece)}
     />
   );
 }
