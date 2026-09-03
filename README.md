@@ -1,3 +1,3 @@
-# Horsing Around
+# Rook Lift
 
 A chess application

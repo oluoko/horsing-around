@@ -1,8 +1,11 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { copyPosition, createPosition } from "@/hooks/use-position";
+import { copyPosition } from "@/hooks/use-position";
 import { useRef, useState, type PointerEvent } from "react";
+import { useBoardContext } from "@/context/board-context";
+import { makeNewMove } from "@/context/actions/move";
+import { Position } from "@/lib/types";
 
 interface DragState {
   rank: number;
@@ -14,7 +17,13 @@ interface DragState {
 
 export default function Pieces() {
   const boardRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState(createPosition());
+
+  const { boardState, dispatch } = useBoardContext() as {
+    boardState: { position: Position[] };
+    dispatch: (action: ReturnType<typeof makeNewMove>) => void;
+  };
+
+  const currentPosition = boardState.position[boardState.position.length - 1];
   const [drag, setDrag] = useState<DragState | null>(null);
 
   const getRelativeCoords = (clientX: number, clientY: number) => {
@@ -72,12 +81,12 @@ export default function Pieces() {
     if (!square) return;
     if (square.rank === rank && square.file === file) return;
 
-    const newPosition = copyPosition(position);
+    const newPosition = copyPosition(currentPosition);
     newPosition[rank][file] = "" as (typeof newPosition)[number][number];
     newPosition[square.rank][square.file] =
       piece as (typeof newPosition)[number][number];
 
-    setPosition(newPosition);
+    dispatch(makeNewMove(newPosition));
   };
 
   return (
@@ -87,14 +96,14 @@ export default function Pieces() {
       onPointerUp={endDrag}
       className="pieces absolute left-0 right-0 top-0 bottom-0"
     >
-      {position.map((r, rank) =>
+      {currentPosition.map((r, rank) =>
         r.map((f, file) =>
-          position[rank][file] ? (
+          currentPosition[rank][file] ? (
             <Piece
               key={`${rank}-${file}`}
               rank={rank}
               file={file}
-              piece={position[rank][file]}
+              piece={currentPosition[rank][file]}
               isDragging={drag?.rank === rank && drag?.file === file}
               dragX={drag?.x}
               dragY={drag?.y}
@@ -129,18 +138,27 @@ function Piece({
     piece: string,
   ) => void;
 }) {
+  const col = file;
+  const row = 7 - rank;
+
+  const restStyle = {
+    left: `${col * 12.5}%`,
+    top: `${row * 12.5}%`,
+  };
+
+  const style =
+    isDragging && dragX !== undefined && dragY !== undefined
+      ? { left: dragX, top: dragY, transform: "translate(-50%, -50%)" }
+      : restStyle;
+
   return (
     <div
       className={cn(
         "piece w-[12.5%] h-[12.5%] absolute bg-center bg-size-[90%] md:bg-size-[100%] bg-no-repeat touch-none",
         piece,
-        isDragging ? "z-50 cursor-grabbing" : `p-${file}${rank} cursor-grab`,
+        isDragging ? "z-50 cursor-grabbing" : "cursor-grab",
       )}
-      style={
-        isDragging && dragX !== undefined && dragY !== undefined
-          ? { left: dragX, top: dragY, transform: "translate(-50%, -50%)" }
-          : undefined
-      }
+      style={style}
       onPointerDown={(e) => onPointerDown(e, rank, file, piece)}
     />
   );

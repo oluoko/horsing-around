@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Horsing Around",
+  title: "Rook Lift",
   description: "A chess application",
   icons: { icon: "/pieces/nightrd-w.svg" },
 };

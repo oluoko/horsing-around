@@ -1,24 +1,11 @@
 "use client";
 
-export type Piece =
-  | "wp"
-  | "bp"
-  | "wr"
-  | "br"
-  | "wn"
-  | "bn"
-  | "wb"
-  | "bb"
-  | "wq"
-  | "bq"
-  | "wk"
-  | "bk";
-
-export type Square = Piece | " ";
-export type Position = Square[][];
+import { Position, Square } from "@/lib/types";
 
 export const createPosition = (): Position => {
-  const position: Position = Array.from({ length: 8 }, () => Array<Square>(8).fill(" "));
+  const position: Position = Array.from({ length: 8 }, () =>
+    Array<Square>(8).fill(" "),
+  );
 
   for (let i = 0; i < 8; i++) {
     position[1][i] = "wp";
@@ -47,7 +34,9 @@ export const createPosition = (): Position => {
 };
 
 export const copyPosition = (position: Position): Position => {
-  const newPosition: Position = Array.from({ length: 8 }, () => Array<Square>(8).fill(" "));
+  const newPosition: Position = Array.from({ length: 8 }, () =>
+    Array<Square>(8).fill(" "),
+  );
 
   for (let rank = 0; rank < 8; rank++) {
     for (let file = 0; file < 8; file++) {
