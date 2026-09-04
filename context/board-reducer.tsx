@@ -18,6 +18,20 @@ export const boardReducer = (
       };
     }
 
+    case "GENERATE_CANDIDATE_MOVES": {
+      return {
+        ...state,
+        candidateMoves: action.payload,
+      };
+    }
+
+    case "CLEAR_CANDIDATE_MOVES": {
+      return {
+        ...state,
+        candidateMoves: [],
+      };
+    }
+
     default:
       return state;
   }

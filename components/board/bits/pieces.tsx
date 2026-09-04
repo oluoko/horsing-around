@@ -4,8 +4,13 @@ import { cn } from "@/lib/utils";
 import { copyPosition } from "@/hooks/use-position";
 import { useRef, useState, type PointerEvent } from "react";
 import { useBoardContext } from "@/context/board-context";
-import { makeNewMove } from "@/context/actions/move";
-import { Position } from "@/lib/types";
+import {
+  clearCandidates,
+  generateCandidateMoves,
+  makeNewMove,
+} from "@/context/actions/move";
+import { GameAction, GameState } from "@/lib/types";
+import arbiter from "@/lib/arbiter";
 
 interface DragState {
   rank: number;
@@ -19,9 +24,11 @@ export default function Pieces() {
   const boardRef = useRef<HTMLDivElement>(null);
 
   const { boardState, dispatch } = useBoardContext() as {
-    boardState: { position: Position[] };
-    dispatch: (action: ReturnType<typeof makeNewMove>) => void;
+    boardState: GameState;
+    dispatch: (action: GameAction) => void;
   };
+
+  const { turn } = boardState;
 
   const currentPosition = boardState.position[boardState.position.length - 1];
   const [drag, setDrag] = useState<DragState | null>(null);
@@ -58,6 +65,16 @@ export default function Pieces() {
     const coords = getRelativeCoords(e.clientX, e.clientY);
     if (!coords) return;
 
+    if (turn === piece[0]) {
+      const candidateMoves = arbiter.getRegularMoves({
+        position: currentPosition,
+        piece,
+        rank,
+        file,
+      });
+      dispatch(generateCandidateMoves(candidateMoves));
+    }
+
     setDrag({ rank, file, piece, x: coords.x, y: coords.y });
   };
 
@@ -82,11 +99,20 @@ export default function Pieces() {
     if (square.rank === rank && square.file === file) return;
 
     const newPosition = copyPosition(currentPosition);
-    newPosition[rank][file] = "" as (typeof newPosition)[number][number];
-    newPosition[square.rank][square.file] =
-      piece as (typeof newPosition)[number][number];
 
-    dispatch(makeNewMove(newPosition));
+    if (
+      boardState.candidateMoves?.find(
+        (n) => n === `${square.rank},${square.file}`,
+      )
+    ) {
+      newPosition[rank][file] = "" as (typeof newPosition)[number][number];
+      newPosition[square.rank][square.file] =
+        piece as (typeof newPosition)[number][number];
+
+      dispatch(makeNewMove(newPosition));
+    }
+
+    dispatch(clearCandidates());
   };
 
   return (

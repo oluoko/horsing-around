@@ -7,11 +7,6 @@ export const createPosition = (): Position => {
     Array<Square>(8).fill(" "),
   );
 
-  for (let i = 0; i < 8; i++) {
-    position[1][i] = "wp";
-    position[6][i] = "bp";
-  }
-
   position[0][0] = "wr";
   position[0][1] = "wn";
   position[0][2] = "wb";

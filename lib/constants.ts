@@ -4,4 +4,5 @@ import { GameState } from "@/lib/types";
 export const initialGameState: GameState = {
   position: [createPosition()],
   turn: "w",
+  candidateMoves: [],
 };

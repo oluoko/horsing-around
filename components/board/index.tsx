@@ -6,13 +6,34 @@ import Square from "@/components/board/bits/square";
 import Pieces from "@/components/board/bits/pieces";
 import { Button } from "../ui/button";
 import { ArrowDownUp } from "lucide-react";
+import { GameState } from "@/lib/types";
+import { useBoardContext } from "@/context/board-context";
 
 export default function Board() {
   const ranks = Array.from({ length: 8 }, (_, i) => 8 - i);
   const files = Array.from({ length: 8 }, (_, i) => i + 1);
 
+  const { boardState } = useBoardContext() as {
+    boardState: GameState;
+  };
+  const position = boardState.position[boardState.position.length - 1];
+
   const isDarkSquare = (rank: number, file: number): boolean => {
     return (rank + file) % 2 === 0;
+  };
+
+  const getClassName = (i: number, j: number) => {
+    let className = "square";
+
+    if (boardState.candidateMoves?.find((n) => n === `${i},${j}`)) {
+      if (position[i][j] !== " ") {
+        className += " attacking";
+      } else {
+        className += " highlight";
+      }
+    }
+
+    return className;
   };
 
   return (
@@ -26,6 +47,7 @@ export default function Board() {
                   key={`${file}-${rank}`}
                   isDark={isDarkSquare(rank, file)}
                   rankLabel={file === 1 ? rank : undefined}
+                  className={getClassName(rank - 1, file - 1)}
                   fileLabel={rank === 1 ? getCharacter(file) : undefined}
                 />
               )),
