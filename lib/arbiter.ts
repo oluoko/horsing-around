@@ -3,6 +3,7 @@ import {
   getBishopMoves,
   getRookMoves,
   getQueenMoves,
+  getKingMoves,
 } from "@/context/actions/get-moves";
 import { Position } from "@/lib/types";
 
@@ -28,6 +29,8 @@ const getRegularMoves = ({
       return getBishopMoves({ position, piece, rank, file });
     case "q":
       return getQueenMoves({ position, piece, rank, file });
+    case "k":
+      return getKingMoves({ position, piece, rank, file });
     default:
       return [];
   }

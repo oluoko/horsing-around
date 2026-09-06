@@ -124,3 +124,38 @@ export const getQueenMoves = ({
 
   return moves;
 };
+
+export const getKingMoves = ({
+  position,
+  piece,
+  rank,
+  file,
+}: MovesProps): string[] => {
+  const moves: string[] = [];
+  const us = piece?.[0];
+
+  const directions = [
+    [-1, -1],
+    [-1, 0],
+    [-1, 1],
+    [0, -1],
+    [0, 1],
+    [1, -1],
+    [1, 0],
+    [1, 1],
+  ];
+
+  directions.forEach(([dx, dy]) => {
+    const x = rank + dx;
+    const y = file + dy;
+
+    if (
+      position?.[x]?.[y] !== undefined &&
+      (!us || !position[x][y].startsWith(us))
+    ) {
+      moves.push(`${x},${y}`);
+    }
+  });
+
+  return moves;
+};
