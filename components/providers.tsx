@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import BoardContext from "@/context/board-context";
 import { boardReducer } from "@/context/board-reducer";
 import { initialGameState } from "@/lib/constants";
+
 export default function AppProviders({ children }: { children: ReactNode }) {
   const [boardState, dispatch] = useReducer(boardReducer, initialGameState);
 

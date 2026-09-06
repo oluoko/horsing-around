@@ -105,7 +105,7 @@ export default function Pieces() {
         (n) => n === `${square.rank},${square.file}`,
       )
     ) {
-      newPosition[rank][file] = "" as (typeof newPosition)[number][number];
+      newPosition[rank][file] = " " as (typeof newPosition)[number][number];
       newPosition[square.rank][square.file] =
         piece as (typeof newPosition)[number][number];
 
