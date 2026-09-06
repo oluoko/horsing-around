@@ -47,3 +47,11 @@ export type GameAction =
   | NewMoveAction
   | GenerateCandidateMovesAction
   | ClearCandidateMoveAction;
+
+export interface MovesProps {
+  position: Position;
+  previousPosition?: Position;
+  piece?: string;
+  rank: number;
+  file: number;
+}

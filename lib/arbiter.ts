@@ -4,21 +4,18 @@ import {
   getRookMoves,
   getQueenMoves,
   getKingMoves,
+  getPawnMoves,
 } from "@/context/actions/get-moves";
-import { Position } from "@/lib/types";
+import { MovesProps } from "@/lib/types";
 
 const getRegularMoves = ({
   position,
+  previousPosition,
   piece,
   rank,
   file,
-}: {
-  position: Position;
-  piece: string;
-  rank: number;
-  file: number;
-}): string[] => {
-  const type = piece[1];
+}: MovesProps): string[] => {
+  const type = piece?.[1];
 
   switch (type) {
     case "r":
@@ -31,6 +28,8 @@ const getRegularMoves = ({
       return getQueenMoves({ position, piece, rank, file });
     case "k":
       return getKingMoves({ position, piece, rank, file });
+    case "p":
+      return getPawnMoves({ position, previousPosition, piece, rank, file });
     default:
       return [];
   }

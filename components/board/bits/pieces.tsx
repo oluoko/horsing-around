@@ -31,6 +31,7 @@ export default function Pieces() {
   const { turn } = boardState;
 
   const currentPosition = boardState.position[boardState.position.length - 1];
+  const previousPosition = boardState.position[boardState.position.length - 2];
   const [drag, setDrag] = useState<DragState | null>(null);
 
   const getRelativeCoords = (clientX: number, clientY: number) => {
@@ -68,6 +69,7 @@ export default function Pieces() {
     if (turn === piece[0]) {
       const candidateMoves = arbiter.getRegularMoves({
         position: currentPosition,
+        previousPosition,
         piece,
         rank,
         file,
@@ -98,13 +100,25 @@ export default function Pieces() {
     if (!square) return;
     if (square.rank === rank && square.file === file) return;
 
-    const newPosition = copyPosition(currentPosition);
+    const isValidMove = boardState.candidateMoves?.find(
+      (n) => n === `${square.rank},${square.file}`,
+    );
 
-    if (
-      boardState.candidateMoves?.find(
-        (n) => n === `${square.rank},${square.file}`,
-      )
-    ) {
+    if (isValidMove) {
+      const newPosition = copyPosition(currentPosition);
+
+      const isPawn = piece.endsWith("p");
+      const isDiagonalMove = file !== square.file;
+      const isEnPassant =
+        isPawn &&
+        isDiagonalMove &&
+        currentPosition[square.rank][square.file] === " ";
+
+      if (isEnPassant) {
+        newPosition[rank][square.file] =
+          " " as (typeof newPosition)[number][number];
+      }
+
       newPosition[rank][file] = " " as (typeof newPosition)[number][number];
       newPosition[square.rank][square.file] =
         piece as (typeof newPosition)[number][number];

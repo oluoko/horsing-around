@@ -1,11 +1,4 @@
-import { Position } from "@/lib/types";
-
-interface MovesProps {
-  position: Position;
-  piece?: string;
-  rank: number;
-  file: number;
-}
+import { MovesProps } from "@/lib/types";
 
 export const getRookMoves = ({
   position,
@@ -156,6 +149,54 @@ export const getKingMoves = ({
       moves.push(`${x},${y}`);
     }
   });
+
+  return moves;
+};
+
+export const getPawnMoves = ({
+  position,
+  previousPosition,
+  piece,
+  rank,
+  file,
+}: MovesProps): string[] => {
+  const moves: string[] = [];
+  const us = piece?.[0];
+  const enemy = us === "w" ? "b" : "w";
+  const dir = piece === "wp" ? 1 : -1;
+  const startRank = piece === "wp" ? 1 : 6;
+
+  if (position?.[rank + dir]?.[file] === " ") {
+    moves.push(`${rank + dir},${file}`);
+
+    if (rank === startRank && position?.[rank + 2 * dir]?.[file] === " ") {
+      moves.push(`${rank + 2 * dir},${file}`);
+    }
+  }
+
+  [-1, 1].forEach((df) => {
+    const cell = position?.[rank + dir]?.[file + df];
+    if (cell?.startsWith(enemy)) {
+      moves.push(`${rank + dir},${file + df}`);
+    }
+  });
+
+  if (previousPosition) {
+    [-1, 1].forEach((df) => {
+      const neighborFile = file + df;
+
+      if (position?.[rank]?.[neighborFile] !== `${enemy}p`) return;
+
+      const enemyStartRank = rank + dir * 2;
+      const jumpedFromStart =
+        previousPosition?.[enemyStartRank]?.[neighborFile] === `${enemy}p`;
+      const wasEmptyBefore = previousPosition?.[rank]?.[neighborFile] === " ";
+
+      if (jumpedFromStart && wasEmptyBefore) {
+        moves.push(`${rank + dir},${neighborFile}`);
+      }
+    });
+  }
 
   return moves;
 };
