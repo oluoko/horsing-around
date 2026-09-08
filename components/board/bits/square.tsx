@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
 import type { CSSProperties } from "react";
 
-const LIGHT = "#E8E8D0";
-const DARK = "#4B7399";
+export const LIGHT = "#E8E8D0";
+export const DARK = "#4B7399";
 
 interface SquareProps {
   isDark: boolean;

@@ -5,4 +5,6 @@ export const initialGameState: GameState = {
   position: [createPosition()],
   turn: "w",
   candidateMoves: [],
+  status: "ongoing",
+  promotion: null,
 };

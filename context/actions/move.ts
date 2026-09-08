@@ -1,4 +1,9 @@
-import { GameAction, Position, CandidateMoves } from "@/lib/types";
+import {
+  GameAction,
+  Position,
+  CandidateMoves,
+  SquareCoords,
+} from "@/lib/types";
 
 export const makeNewMove = (newPosition: Position): GameAction => {
   return {
@@ -19,5 +24,22 @@ export const generateCandidateMoves = (
 export const clearCandidates = (): GameAction => {
   return {
     type: "CLEAR_CANDIDATE_MOVES",
+  };
+};
+
+export const openPromotion = (payload: {
+  from: SquareCoords;
+  to: SquareCoords;
+}): GameAction => {
+  return {
+    type: "PROMOTION_OPEN",
+    payload,
+  };
+};
+
+export const completePromotion = (newPosition: Position): GameAction => {
+  return {
+    type: "PROMOTION_COMPLETE",
+    payload: newPosition,
   };
 };

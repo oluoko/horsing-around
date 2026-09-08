@@ -8,7 +8,6 @@ export const boardReducer = (
     case "NEW_MOVE": {
       let { turn, position } = state;
       turn = turn === "w" ? "b" : "w";
-
       position = [...position, action.payload];
 
       return {
@@ -29,6 +28,29 @@ export const boardReducer = (
       return {
         ...state,
         candidateMoves: [],
+      };
+    }
+
+    case "PROMOTION_OPEN": {
+      return {
+        ...state,
+        status: "promoting",
+        promotion: action.payload,
+        candidateMoves: [],
+      };
+    }
+
+    case "PROMOTION_COMPLETE": {
+      let { turn, position } = state;
+      turn = turn === "w" ? "b" : "w";
+      position = [...position, action.payload];
+
+      return {
+        ...state,
+        turn,
+        position,
+        status: "ongoing",
+        promotion: null,
       };
     }
 

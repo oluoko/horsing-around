@@ -18,35 +18,31 @@ export type Position = Square[][];
 
 export type CandidateMoves = string[];
 
+export type SquareCoords = {
+  rank: number;
+  file: number;
+};
+
+export type GameStatus = "ongoing" | "promoting" | "white-wins" | "black-wins";
+
 export type GameState = {
   position: Position[];
   turn: "w" | "b";
   candidateMoves: CandidateMoves;
+  status: GameStatus;
+  promotion: { from: SquareCoords; to: SquareCoords } | null;
 };
 
-export type MoveActionType =
-  | "NEW_MOVE"
-  | "GENERATE_CANDIDATE_MOVES"
-  | "CLEAR_CANDIDATES_MOVES";
-
-export type NewMoveAction = {
-  type: "NEW_MOVE";
-  payload: Position;
-};
-
-export type GenerateCandidateMovesAction = {
-  type: "GENERATE_CANDIDATE_MOVES";
-  payload: CandidateMoves;
-};
-
-export type ClearCandidateMoveAction = {
-  type: "CLEAR_CANDIDATE_MOVES";
-};
+type Action<T extends string, P = undefined> = P extends undefined
+  ? { type: T }
+  : { type: T; payload: P };
 
 export type GameAction =
-  | NewMoveAction
-  | GenerateCandidateMovesAction
-  | ClearCandidateMoveAction;
+  | Action<"NEW_MOVE", Position>
+  | Action<"GENERATE_CANDIDATE_MOVES", CandidateMoves>
+  | Action<"CLEAR_CANDIDATE_MOVES">
+  | Action<"PROMOTION_OPEN", { from: SquareCoords; to: SquareCoords }>
+  | Action<"PROMOTION_COMPLETE", Position>;
 
 export interface MovesProps {
   position: Position;
@@ -55,3 +51,11 @@ export interface MovesProps {
   rank: number;
   file: number;
 }
+
+export type PerformMoveProps = {
+  position: Position;
+  piece: string;
+  rank: number;
+  file: number;
+  square: SquareCoords;
+};

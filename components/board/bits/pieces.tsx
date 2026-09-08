@@ -1,13 +1,13 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { copyPosition } from "@/hooks/use-position";
 import { useRef, useState, type PointerEvent } from "react";
 import { useBoardContext } from "@/context/board-context";
 import {
   clearCandidates,
   generateCandidateMoves,
   makeNewMove,
+  openPromotion,
 } from "@/context/actions/move";
 import { GameAction, GameState } from "@/lib/types";
 import arbiter from "@/lib/arbiter";
@@ -55,6 +55,44 @@ export default function Pieces() {
     return { rank, file };
   };
 
+  const move = (e: PointerEvent<HTMLDivElement>) => {
+    if (!drag) return;
+
+    const square = getSquare(e.clientX, e.clientY);
+    const { rank, file, piece } = drag;
+
+    setDrag(null);
+
+    if (!square) return;
+    if (square.rank === rank && square.file === file) return;
+
+    const isValidMove = boardState.candidateMoves?.find(
+      (n) => n === `${square.rank},${square.file}`,
+    );
+
+    if (isValidMove) {
+      if (
+        (piece === "wp" && square.rank === 7) ||
+        (piece === "bp" && square.rank === 0)
+      ) {
+        dispatch(openPromotion({ from: { rank, file }, to: square }));
+        return;
+      }
+
+      const newPosition = arbiter.performMove({
+        position: currentPosition,
+        piece,
+        rank,
+        file,
+        square,
+      });
+
+      dispatch(makeNewMove(newPosition));
+    }
+
+    dispatch(clearCandidates());
+  };
+
   const startDrag = (
     e: PointerEvent<HTMLDivElement>,
     rank: number,
@@ -90,43 +128,7 @@ export default function Pieces() {
   };
 
   const endDrag = (e: PointerEvent<HTMLDivElement>) => {
-    if (!drag) return;
-
-    const square = getSquare(e.clientX, e.clientY);
-    const { rank, file, piece } = drag;
-
-    setDrag(null);
-
-    if (!square) return;
-    if (square.rank === rank && square.file === file) return;
-
-    const isValidMove = boardState.candidateMoves?.find(
-      (n) => n === `${square.rank},${square.file}`,
-    );
-
-    if (isValidMove) {
-      const newPosition = copyPosition(currentPosition);
-
-      const isPawn = piece.endsWith("p");
-      const isDiagonalMove = file !== square.file;
-      const isEnPassant =
-        isPawn &&
-        isDiagonalMove &&
-        currentPosition[square.rank][square.file] === " ";
-
-      if (isEnPassant) {
-        newPosition[rank][square.file] =
-          " " as (typeof newPosition)[number][number];
-      }
-
-      newPosition[rank][file] = " " as (typeof newPosition)[number][number];
-      newPosition[square.rank][square.file] =
-        piece as (typeof newPosition)[number][number];
-
-      dispatch(makeNewMove(newPosition));
-    }
-
-    dispatch(clearCandidates());
+    move(e);
   };
 
   return (

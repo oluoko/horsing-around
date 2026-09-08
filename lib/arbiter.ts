@@ -6,7 +6,8 @@ import {
   getKingMoves,
   getPawnMoves,
 } from "@/context/actions/get-moves";
-import { MovesProps } from "@/lib/types";
+import { copyPosition } from "@/hooks/use-position";
+import { MovesProps, PerformMoveProps, Position } from "@/lib/types";
 
 const getRegularMoves = ({
   position,
@@ -35,6 +36,32 @@ const getRegularMoves = ({
   }
 };
 
-const arbiter = { getRegularMoves };
+const performMove = ({
+  position,
+  piece,
+  rank,
+  file,
+  square,
+}: PerformMoveProps): Position => {
+  const newPosition = copyPosition(position);
+
+  const isPawn = piece.endsWith("p");
+  const isDiagonalMove = file !== square.file;
+  const isEnPassant =
+    isPawn && isDiagonalMove && position[square.rank][square.file] === " ";
+
+  if (isEnPassant) {
+    newPosition[rank][square.file] =
+      " " as (typeof newPosition)[number][number];
+  }
+
+  newPosition[rank][file] = " " as (typeof newPosition)[number][number];
+  newPosition[square.rank][square.file] =
+    piece as (typeof newPosition)[number][number];
+
+  return newPosition;
+};
+
+const arbiter = { getRegularMoves, performMove };
 
 export default arbiter;
