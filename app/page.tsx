@@ -3,14 +3,9 @@ import ThemeToggle from "@/components/ui/them-toggle";
 
 export default function Home() {
   return (
-    <div className="relative h-screen w-screen container grid grid-cols-9 items-center justify-center">
+    <div className="relative min-h-screen w-full flex items-center justify-center p-4">
       <ThemeToggle className="fixed top-2 right-2 md:top-4 md:right-4" />
-
-      <div className="col-span-1" />
-
       <Board />
-
-      <div className="col-span-3" />
     </div>
   );
 }

@@ -1,8 +1,9 @@
 import { cn } from "@/lib/utils";
 import { LIGHT, DARK } from "@/components/board/bits/square";
+import { Turn } from "@/lib/types";
 
 interface PromotionBoxProps {
-  color: "w" | "b";
+  color: Turn;
   onSelect: (piece: string) => void;
 }
 

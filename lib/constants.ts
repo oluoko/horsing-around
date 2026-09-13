@@ -7,4 +7,8 @@ export const initialGameState: GameState = {
   candidateMoves: [],
   status: "ongoing",
   promotion: null,
+  castlingDirections: {
+    w: "both",
+    b: "both",
+  },
 };

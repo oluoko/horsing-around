@@ -8,14 +8,18 @@ import {
   generateCandidateMoves,
   makeNewMove,
   openPromotion,
-} from "@/context/actions/move";
-import { GameAction, GameState } from "@/lib/types";
+  updateCastling,
+  detectStalemate,
+  detectCheckmate,
+  insufficientMaterial,
+} from "@/actions/game";
+import { GameAction, GameState, Piece } from "@/lib/types";
 import arbiter from "@/lib/arbiter";
 
 interface DragState {
   rank: number;
   file: number;
-  piece: string;
+  piece: Piece;
   x: number;
   y: number;
 }
@@ -28,10 +32,10 @@ export default function Pieces() {
     dispatch: (action: GameAction) => void;
   };
 
-  const { turn } = boardState;
+  const { turn, castlingDirections, position } = boardState;
 
-  const currentPosition = boardState.position[boardState.position.length - 1];
-  const previousPosition = boardState.position[boardState.position.length - 2];
+  const currentPosition = position[position.length - 1];
+  const previousPosition = position[position.length - 2];
   const [drag, setDrag] = useState<DragState | null>(null);
 
   const getRelativeCoords = (clientX: number, clientY: number) => {
@@ -55,6 +59,27 @@ export default function Pieces() {
     return { rank, file };
   };
 
+  const updateCastlingState = ({
+    rank,
+    file,
+    piece,
+  }: {
+    rank: number;
+    file: number;
+    piece: Piece;
+  }) => {
+    const direction = arbiter.getCastleDirections({
+      castlingDirection: boardState.castlingDirections,
+      piece,
+      rank,
+      file,
+    });
+
+    if (direction) {
+      dispatch(updateCastling(direction));
+    }
+  };
+
   const move = (e: PointerEvent<HTMLDivElement>) => {
     if (!drag) return;
 
@@ -71,12 +96,18 @@ export default function Pieces() {
     );
 
     if (isValidMove) {
+      const castlingDirection =
+        boardState.castlingDirections[`${piece.startsWith("b") ? "w" : "b"}`];
       if (
         (piece === "wp" && square.rank === 7) ||
         (piece === "bp" && square.rank === 0)
       ) {
         dispatch(openPromotion({ from: { rank, file }, to: square }));
         return;
+      }
+
+      if (piece.endsWith("r") || piece.endsWith("k")) {
+        updateCastlingState({ rank, file, piece });
       }
 
       const newPosition = arbiter.performMove({
@@ -88,6 +119,36 @@ export default function Pieces() {
       });
 
       dispatch(makeNewMove(newPosition));
+
+      if (
+        arbiter.isStalemate({
+          position: newPosition,
+          player: turn === "w" ? "b" : "w",
+          castlingDirection,
+        })
+      ) {
+        dispatch(detectStalemate());
+      }
+
+      const isInMate = arbiter.isCheckmate({
+        position: newPosition,
+        player: turn === "w" ? "b" : "w",
+        castlingDirection,
+      });
+
+      if (isInMate.checkmate) {
+        dispatch(
+          detectCheckmate({ whoIsInCheckmate: isInMate.whoIsInCheckmate }),
+        );
+      }
+
+      const isMaterialInsufficient = arbiter.isMaterialInsufficient({
+        position: newPosition,
+      });
+
+      if (isMaterialInsufficient) {
+        dispatch(insufficientMaterial());
+      }
     }
 
     dispatch(clearCandidates());
@@ -97,7 +158,7 @@ export default function Pieces() {
     e: PointerEvent<HTMLDivElement>,
     rank: number,
     file: number,
-    piece: string,
+    piece: Piece,
   ) => {
     e.currentTarget.setPointerCapture(e.pointerId);
 
@@ -105,9 +166,10 @@ export default function Pieces() {
     if (!coords) return;
 
     if (turn === piece[0]) {
-      const candidateMoves = arbiter.getRegularMoves({
+      const candidateMoves = arbiter.getValidMoves({
         position: currentPosition,
         previousPosition,
+        castlingDirections: castlingDirections[turn],
         piece,
         rank,
         file,
@@ -141,11 +203,11 @@ export default function Pieces() {
       {currentPosition.map((r, rank) =>
         r.map((f, file) =>
           currentPosition[rank][file] ? (
-            <Piece
+            <SinglePiece
               key={`${rank}-${file}`}
               rank={rank}
               file={file}
-              piece={currentPosition[rank][file]}
+              piece={currentPosition[rank][file] as Piece}
               isDragging={drag?.rank === rank && drag?.file === file}
               dragX={drag?.x}
               dragY={drag?.y}
@@ -158,7 +220,7 @@ export default function Pieces() {
   );
 }
 
-function Piece({
+function SinglePiece({
   rank,
   file,
   piece,
@@ -169,7 +231,7 @@ function Piece({
 }: {
   rank: number;
   file: number;
-  piece: string;
+  piece: Piece;
   isDragging: boolean;
   dragX?: number;
   dragY?: number;
@@ -177,7 +239,7 @@ function Piece({
     e: PointerEvent<HTMLDivElement>,
     rank: number,
     file: number,
-    piece: string,
+    piece: Piece,
   ) => void;
 }) {
   const col = file;

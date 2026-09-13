@@ -4,9 +4,10 @@ import PromotionBox, {
   promotionOptions,
 } from "@/components/popup/promotion-box";
 import { useBoardContext } from "@/context/board-context";
-import { completePromotion } from "@/context/actions/move";
+import { clearCandidates, completePromotion } from "@/actions/game";
 import arbiter from "@/lib/arbiter";
-import { GameAction, GameState } from "@/lib/types";
+import { GameAction, GameState, Piece } from "@/lib/types";
+import GameEnds from "@/components/popup/game-ends";
 
 export default function Popup() {
   const { boardState, dispatch } = useBoardContext() as {
@@ -14,30 +15,54 @@ export default function Popup() {
     dispatch: (action: GameAction) => void;
   };
 
-  if (boardState.status !== "promoting" || !boardState.promotion) {
-    return null;
+  if (boardState.status === "promoting" && boardState.promotion) {
+    const { from, to } = boardState.promotion;
+    const currentPosition = boardState.position[boardState.position.length - 1];
+
+    const onOptionSelect = (option: (typeof promotionOptions)[number]) => {
+      const piece = `${boardState.turn}${option}` as Piece;
+
+      const newPosition = arbiter.performMove({
+        position: currentPosition,
+        piece,
+        rank: from.rank,
+        file: from.file,
+        square: to,
+      });
+
+      dispatch(clearCandidates());
+
+      dispatch(completePromotion(newPosition));
+    };
+
+    return (
+      <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40">
+        <PromotionBox color={boardState.turn} onSelect={onOptionSelect} />
+      </div>
+    );
   }
 
-  const { from, to } = boardState.promotion;
-  const currentPosition = boardState.position[boardState.position.length - 1];
+  if (boardState.status === "stalemate") {
+    return <GameEnds status={boardState.status} />;
+  }
 
-  const onOptionSelect = (option: (typeof promotionOptions)[number]) => {
-    const piece = `${boardState.turn}${option}`;
+  if (boardState.status === "insufficient") {
+    return <GameEnds status={boardState.status} />;
+  }
 
-    const newPosition = arbiter.performMove({
-      position: currentPosition,
-      piece,
-      rank: from.rank,
-      file: from.file,
-      square: to,
-    });
+  if (boardState.status === "white-wins") {
+    return <GameEnds status={boardState.status} />;
+  }
 
-    dispatch(completePromotion(newPosition));
-  };
+  if (boardState.status === "black-wins") {
+    return <GameEnds status={boardState.status} />;
+  }
 
-  return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40">
-      <PromotionBox color={boardState.turn} onSelect={onOptionSelect} />
-    </div>
-  );
+  if (boardState.status === "white-resigns") {
+    return <GameEnds status={boardState.status} />;
+  }
+
+  if (boardState.status === "black-resigns") {
+    return <GameEnds status={boardState.status} />;
+  }
 }

@@ -54,6 +54,53 @@ export const boardReducer = (
       };
     }
 
+    case "CAN_CASTLE": {
+      const { turn, castlingDirections } = state;
+      castlingDirections[turn] = action.payload;
+
+      return {
+        ...state,
+        castlingDirections,
+      };
+    }
+
+    case "STALEMATE": {
+      return {
+        ...state,
+        status: "stalemate",
+      };
+    }
+
+    case "CHECKMATE": {
+      const whoIsInMate = action.payload;
+      return {
+        ...state,
+        status: whoIsInMate === "b" ? "white-wins" : "black-wins",
+      };
+    }
+
+    case "INSUFFICIENT_MATERIAL": {
+      return {
+        ...state,
+        status: "insufficient",
+      };
+    }
+
+    case "RESIGN": {
+      const turn = action.payload;
+
+      return {
+        ...state,
+        status: turn === "w" ? "white-resigns" : "black-resigns",
+      };
+    }
+
+    case "NEW_GAME": {
+      return {
+        ...action.payload,
+      };
+    }
+
     default:
       return state;
   }
