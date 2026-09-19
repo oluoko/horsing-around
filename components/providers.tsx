@@ -16,7 +16,7 @@ export default function AppProviders({ children }: { children: ReactNode }) {
   };
   return (
     <BoardContext.Provider value={boardProviderState}>
-      <ThemeProvider>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <NextTopLoader
           color="#CE974E"
           showSpinner={false}

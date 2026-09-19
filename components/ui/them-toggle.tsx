@@ -15,7 +15,7 @@ export default function ThemeToggle({
 }) {
   const { resolvedTheme, setTheme } = useTheme();
 
-  console.log("Resolved The", resolvedTheme);
+  console.log("Resolved Theme", resolvedTheme);
   const toggleTheme = () => {
     setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
@@ -24,7 +24,7 @@ export default function ThemeToggle({
     <Button
       variant={"outline"}
       size={"icon"}
-      className={cn("rounded-none", className)}
+      className={cn(className)}
       onClick={toggleTheme}
     >
       <Sun className="scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90 size-5 hover:animate-spin" />
