@@ -283,3 +283,22 @@
   background: rgba(255, 0, 0, 0.45);
   pointer-events: none;
 }
+
+.moves-list {
+  align-content: start;
+  font-size: 1.1em;
+}
+
+.moves-list div {
+  flex-basis: 35%;
+  padding-left: 15%;
+  padding-bottom: 5px;
+  text-align: left;
+}
+
+.moves-list div[data-number]:nth-child[odd]::before {
+  content: attr(data-number);
+  position: absolute;
+  left: 0;
+  opacity: 0.5;
+}

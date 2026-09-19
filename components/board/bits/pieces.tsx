@@ -15,6 +15,7 @@ import {
 } from "@/actions/game";
 import { GameAction, GameState, Piece } from "@/lib/types";
 import arbiter from "@/lib/arbiter";
+import { getNewMoveNotation } from "@/actions/get-moves";
 
 interface DragState {
   rank: number;
@@ -118,7 +119,15 @@ export default function Pieces() {
         square,
       });
 
-      dispatch(makeNewMove(newPosition));
+      const newMoveNotation = getNewMoveNotation({
+        position: currentPosition,
+        piece,
+        rank,
+        file,
+        square,
+      });
+
+      dispatch(makeNewMove(newPosition, newMoveNotation));
 
       if (
         arbiter.isStalemate({
@@ -220,7 +229,7 @@ export default function Pieces() {
   );
 }
 
-function SinglePiece({
+export function SinglePiece({
   rank,
   file,
   piece,
@@ -264,6 +273,17 @@ function SinglePiece({
       )}
       style={style}
       onPointerDown={(e) => onPointerDown(e, rank, file, piece)}
+    />
+  );
+}
+
+export function PieceImage({ piece }: { piece: Piece }) {
+  return (
+    <div
+      className={cn(
+        "piece bg-center size-[100px] bg-size-[90%] md:bg-size-[100%] bg-no-repeat touch-none",
+        piece,
+      )}
     />
   );
 }

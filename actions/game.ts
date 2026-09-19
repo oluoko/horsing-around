@@ -8,10 +8,13 @@ import {
   Turn,
 } from "@/lib/types";
 
-export const makeNewMove = (newPosition: Position): GameAction => {
+export const makeNewMove = (
+  newPosition: Position,
+  newMoveNotation: string,
+): GameAction => {
   return {
     type: "NEW_MOVE",
-    payload: newPosition,
+    payload: { newPosition, newMoveNotation },
   };
 };
 
@@ -40,10 +43,13 @@ export const openPromotion = (payload: {
   };
 };
 
-export const completePromotion = (newPosition: Position): GameAction => {
+export const completePromotion = (
+  newPosition: Position,
+  newMoveNotation: string,
+): GameAction => {
   return {
     type: "PROMOTION_COMPLETE",
-    payload: newPosition,
+    payload: { newPosition, newMoveNotation },
   };
 };
 
@@ -81,6 +87,12 @@ export const resign = (turn: Turn): GameAction => {
   return {
     type: "RESIGN",
     payload: turn,
+  };
+};
+
+export const takeBack = (): GameAction => {
+  return {
+    type: "TAKE_BACK",
   };
 };
 

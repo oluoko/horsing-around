@@ -1,13 +1,13 @@
 import { cn } from "@/lib/utils";
 import { LIGHT, DARK } from "@/components/board/bits/square";
-import { Turn } from "@/lib/types";
+import { PromotionOptions, Turn } from "@/lib/types";
 
 interface PromotionBoxProps {
   color: Turn;
-  onSelect: (piece: string) => void;
+  onSelect: (piece: PromotionOptions) => void;
 }
 
-export const promotionOptions = ["q", "r", "b", "n"];
+export const promotionOptions = ["q", "r", "b", "n"] as const;
 
 export default function PromotionBox({ color, onSelect }: PromotionBoxProps) {
   return (

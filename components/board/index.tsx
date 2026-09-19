@@ -5,13 +5,13 @@ import { getCharacter } from "@/lib/utils";
 import Square from "@/components/board/bits/square";
 import Pieces from "@/components/board/bits/pieces";
 import { Button } from "@/components/ui/button";
-import { ArrowDownUp, Flag } from "lucide-react";
+import { ArrowDownUp, Flag, Undo } from "lucide-react";
 import { GameAction, GameState } from "@/lib/types";
 import { useBoardContext } from "@/context/board-context";
 import Popup from "@/components/popup";
 import arbiter from "@/lib/arbiter";
 import { getKingPosition } from "@/actions/get-moves";
-import { resign } from "@/actions/game";
+import { resign, takeBack } from "@/actions/game";
 
 export default function Board() {
   const ranks = Array.from({ length: 8 }, (_, i) => 8 - i);
@@ -91,6 +91,13 @@ export default function Board() {
           }}
         >
           <Flag />
+        </Button>
+        <Button
+          onClick={() => {
+            dispatch(takeBack());
+          }}
+        >
+          <Undo />
         </Button>
       </div>
     </div>

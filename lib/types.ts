@@ -1,3 +1,5 @@
+import { promotionOptions } from "@/components/popup/promotion-box";
+
 export type Piece =
   | "wp"
   | "bp"
@@ -45,6 +47,7 @@ export type Turn = "w" | "b";
 export type GameState = {
   position: Position[];
   turn: Turn;
+  movesList: string[];
   candidateMoves: CandidateMoves;
   status: GameStatus;
   promotion: { from: SquareCoords; to: SquareCoords } | null;
@@ -56,17 +59,23 @@ type Action<T extends string, P = undefined> = P extends undefined
   : { type: T; payload: P };
 
 export type GameAction =
-  | Action<"NEW_MOVE", Position>
+  | Action<"NEW_MOVE", { newPosition: Position; newMoveNotation: string }>
   | Action<"CAN_CASTLE", CastlingDirections>
   | Action<"GENERATE_CANDIDATE_MOVES", CandidateMoves>
   | Action<"CLEAR_CANDIDATE_MOVES">
   | Action<"PROMOTION_OPEN", { from: SquareCoords; to: SquareCoords }>
-  | Action<"PROMOTION_COMPLETE", Position>
+  | Action<
+      "PROMOTION_COMPLETE",
+      { newPosition: Position; newMoveNotation: string }
+    >
   | Action<"STALEMATE">
   | Action<"INSUFFICIENT_MATERIAL">
   | Action<"CHECKMATE", Turn | "none">
   | Action<"RESIGN", Turn>
-  | Action<"NEW_GAME", GameState>;
+  | Action<"NEW_GAME", GameState>
+  | Action<"TAKE_BACK">;
+
+export type PromotionOptions = (typeof promotionOptions)[number];
 
 export interface MovesProps {
   position: Position;
@@ -76,4 +85,5 @@ export interface MovesProps {
   rank: number;
   file: number;
   square?: SquareCoords;
+  promotsTo?: PromotionOptions;
 }

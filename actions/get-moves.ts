@@ -1,5 +1,6 @@
 import arbiter from "@/lib/arbiter";
 import { MovesProps, Piece, Position, Turn, SquareCoords } from "@/lib/types";
+import { getCharacter } from "@/lib/utils";
 
 export const getRookMoves = ({
   position,
@@ -439,4 +440,41 @@ export const findPieceCoords = ({
   });
 
   return results;
+};
+
+export const getNewMoveNotation = ({
+  position,
+  piece,
+  file,
+  square,
+  promotsTo,
+}: MovesProps): string => {
+  let note = "";
+
+  if (!square || !piece) {
+    return note;
+  }
+
+  if (piece[1] === "k" && Math.abs(file - square.file) === 2) {
+    return square.file > file ? "O-O" : "O-O-O";
+  }
+
+  const isCapture = position[square.rank][square.file] !== " ";
+
+  if (piece[1] !== "p") {
+    note += piece[1].toUpperCase();
+    if (isCapture) {
+      note += "x";
+    }
+  } else if (file !== square.file) {
+    note += getCharacter(file + 1) + "x";
+  }
+
+  note += getCharacter(square.file + 1) + (square.rank + 1);
+
+  if (promotsTo) {
+    note += "=" + promotsTo.toUpperCase();
+  }
+
+  return note;
 };

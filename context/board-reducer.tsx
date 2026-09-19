@@ -6,14 +6,17 @@ export const boardReducer = (
 ): GameState => {
   switch (action.type) {
     case "NEW_MOVE": {
-      let { turn, position } = state;
+      let { turn, position, movesList } = state;
       turn = turn === "w" ? "b" : "w";
-      position = [...position, action.payload];
+      position = [...position, action.payload.newPosition];
+
+      movesList = [...movesList, action.payload.newMoveNotation];
 
       return {
         ...state,
         turn,
         position,
+        movesList,
       };
     }
 
@@ -41,14 +44,16 @@ export const boardReducer = (
     }
 
     case "PROMOTION_COMPLETE": {
-      let { turn, position } = state;
+      let { turn, position, movesList } = state;
       turn = turn === "w" ? "b" : "w";
-      position = [...position, action.payload];
+      position = [...position, action.payload.newPosition];
+      movesList = [...movesList, action.payload.newMoveNotation];
 
       return {
         ...state,
         turn,
         position,
+        movesList,
         status: "ongoing",
         promotion: null,
       };
@@ -92,6 +97,23 @@ export const boardReducer = (
       return {
         ...state,
         status: turn === "w" ? "white-resigns" : "black-resigns",
+      };
+    }
+
+    case "TAKE_BACK": {
+      let { position, movesList, turn } = state;
+
+      if (position.length > 1) {
+        position = position.slice(0, position.length - 1);
+        movesList = movesList.slice(0, movesList.length - 1);
+        turn = turn === "w" ? "b" : "w";
+      }
+
+      return {
+        ...state,
+        position,
+        movesList,
+        turn,
       };
     }
 

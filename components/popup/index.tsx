@@ -1,13 +1,12 @@
 "use client";
 
-import PromotionBox, {
-  promotionOptions,
-} from "@/components/popup/promotion-box";
+import PromotionBox from "@/components/popup/promotion-box";
 import { useBoardContext } from "@/context/board-context";
 import { clearCandidates, completePromotion } from "@/actions/game";
 import arbiter from "@/lib/arbiter";
-import { GameAction, GameState, Piece } from "@/lib/types";
+import { GameAction, GameState, Piece, PromotionOptions } from "@/lib/types";
 import GameEnds from "@/components/popup/game-ends";
+import { getNewMoveNotation } from "@/actions/get-moves";
 
 export default function Popup() {
   const { boardState, dispatch } = useBoardContext() as {
@@ -19,7 +18,7 @@ export default function Popup() {
     const { from, to } = boardState.promotion;
     const currentPosition = boardState.position[boardState.position.length - 1];
 
-    const onOptionSelect = (option: (typeof promotionOptions)[number]) => {
+    const onOptionSelect = (option: PromotionOptions) => {
       const piece = `${boardState.turn}${option}` as Piece;
 
       const newPosition = arbiter.performMove({
@@ -30,9 +29,17 @@ export default function Popup() {
         square: to,
       });
 
-      dispatch(clearCandidates());
+      const newMoveNotation = getNewMoveNotation({
+        rank: from.rank,
+        file: from.file,
+        square: to,
+        piece,
+        promotsTo: option,
+        position: currentPosition,
+      });
 
-      dispatch(completePromotion(newPosition));
+      dispatch(clearCandidates());
+      dispatch(completePromotion(newPosition, newMoveNotation));
     };
 
     return (

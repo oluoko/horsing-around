@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { ReactNode } from "react";
+import { Geist, Geist_Mono, Inter } from "next/font/google";
 import AppProviders from "@/components/providers";
 import "./globals.css";
 import "./board.css";
+import { cn } from "@/lib/utils";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,12 +24,18 @@ export const metadata: Metadata = {
   icons: { icon: "/pieces/nightrd-w.svg" },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       suppressHydrationWarning
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={cn(
+        "antialiased",
+        geistSans.variable,
+        geistMono.variable,
+        "font-sans",
+        inter.variable,
+      )}
     >
       <body className="min-h-full flex flex-col">
         <AppProviders>{children}</AppProviders>
