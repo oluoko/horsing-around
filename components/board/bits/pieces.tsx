@@ -459,7 +459,7 @@ export function PieceImage({ piece }: { piece: Piece }) {
   return (
     <div
       className={cn(
-        "piece bg-center size-[100px] bg-size-[90%] md:bg-size-[100%] bg-no-repeat touch-none",
+        "piece bg-center size-25 bg-size-[90%] md:bg-size-[100%] bg-no-repeat touch-none",
         piece,
       )}
     />
