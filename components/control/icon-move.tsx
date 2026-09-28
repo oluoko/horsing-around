@@ -4,12 +4,14 @@ import {
   FaChessKnight,
   FaChessQueen,
   FaChessRook,
-} from "react-icons/fa6";
+} from "react-icons/fa";
+
+import { TbChessRookFilled } from "react-icons/tb";
 
 const pieceIcons: Record<string, React.ComponentType<{ size?: number }>> = {
   K: FaChessKing,
   Q: FaChessQueen,
-  R: FaChessRook,
+  R: TbChessRookFilled,
   B: FaChessBishop,
   N: FaChessKnight,
 };
