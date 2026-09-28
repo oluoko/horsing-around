@@ -1,6 +1,7 @@
 "use client";
 
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { useState } from "react";
 import { getCharacter } from "@/lib/utils";
 import Square from "@/components/board/bits/square";
 import Pieces from "@/components/board/bits/pieces";
@@ -12,10 +13,17 @@ import Popup from "@/components/popup";
 import arbiter from "@/lib/arbiter";
 import { getKingPosition } from "@/actions/get-moves";
 import { resign, takeBack } from "@/actions/game";
+import ThemeToggle from "@/components/ui/them-toggle";
 
 export default function Board() {
-  const ranks = Array.from({ length: 8 }, (_, i) => 8 - i);
-  const files = Array.from({ length: 8 }, (_, i) => i + 1);
+  const [flipped, setFlipped] = useState(false);
+
+  const ranks = flipped
+    ? Array.from({ length: 8 }, (_, i) => i + 1)
+    : Array.from({ length: 8 }, (_, i) => 8 - i);
+  const files = flipped
+    ? Array.from({ length: 8 }, (_, i) => 8 - i)
+    : Array.from({ length: 8 }, (_, i) => i + 1);
 
   const { boardState, dispatch } = useBoardContext() as {
     boardState: GameState;
@@ -43,11 +51,7 @@ export default function Board() {
     let className = "square";
 
     if (boardState.candidateMoves?.find((n) => n === `${i},${j}`)) {
-      if (position[i][j] !== " ") {
-        className += " attacking";
-      } else {
-        className += " highlight";
-      }
+      className += position[i][j] !== " " ? " attacking" : " highlight";
     }
 
     if (isChecked && isChecked[0] === i && isChecked[1] === j) {
@@ -58,7 +62,7 @@ export default function Board() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 items-center justify-center w-full md:w-min">
+    <div className="flex flex-col md:flex-row gap-4">
       <div className="relative size-[95vw] md:size-[95vh] p-1 bg-red-950/70">
         <AspectRatio ratio={1}>
           <div className="grid grid-cols-8 grid-rows-8 size-full">
@@ -67,38 +71,46 @@ export default function Board() {
                 <Square
                   key={`${file}-${rank}`}
                   isDark={isDarkSquare(rank, file)}
-                  rankLabel={file === 1 ? rank : undefined}
+                  rankLabel={file === files[0] ? rank : undefined}
                   className={getClassName(rank - 1, file - 1)}
-                  fileLabel={rank === 1 ? getCharacter(file) : undefined}
+                  fileLabel={
+                    rank === ranks[ranks.length - 1]
+                      ? getCharacter(file)
+                      : undefined
+                  }
                 />
               )),
             )}
           </div>
 
-          <Pieces />
+          <Pieces flipped={flipped} />
           <Popup />
         </AspectRatio>
       </div>
-      <div className="flex md:grid gap-2 w-min">
-        <Button variant="outline" onClick={() => {}}>
-          <ArrowDownUp />
-        </Button>
 
-        <Button
-          variant="destructive"
-          onClick={() => {
-            dispatch(resign(boardState.turn));
-          }}
-        >
-          <Flag />
-        </Button>
-        <Button
-          onClick={() => {
-            dispatch(takeBack());
-          }}
-        >
-          <Undo />
-        </Button>
+      <div className="flex flex-row md:flex-col justify-between ">
+        <div className="flex flex-row md:flex-col gap-2 items-center justify-center">
+          <ThemeToggle className="" />
+        </div>
+        <div className="flex flex-row md:flex-col gap-2 items-center justify-center">
+          <Button variant="outline" onClick={() => setFlipped((f) => !f)}>
+            <ArrowDownUp />
+          </Button>
+
+          <Button
+            variant="destructive"
+            onClick={() => dispatch(resign(boardState.turn))}
+          >
+            <Flag />
+          </Button>
+          <Button
+            onClick={() => {
+              dispatch(takeBack());
+            }}
+          >
+            <Undo />
+          </Button>
+        </div>
       </div>
     </div>
   );
