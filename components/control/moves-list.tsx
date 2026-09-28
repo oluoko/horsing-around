@@ -3,6 +3,7 @@
 import { useBoardContext } from "@/context/board-context";
 import { GameState } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import IconMove from "./icon-move";
 
 export default function MovesList() {
   const { boardState } = useBoardContext() as {
@@ -32,7 +33,8 @@ export default function MovesList() {
             {isWhiteMove && (
               <span className="opacity-50 mx-1">{Math.floor(i / 2) + 1}.</span>
             )}
-            <span>{move}</span>
+
+            <IconMove move={move} />
           </div>
         );
       })}
