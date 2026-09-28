@@ -13,7 +13,7 @@ export default function MovesList() {
   const { movesList } = boardState;
 
   return (
-    <div className="flex flex-row flex-nowrap md:flex-wrap content-start overflow-x-auto md:overflow-y-auto md:overflow-x-hidden text-[1.1em] ">
+    <div className="flex flex-row flex-nowrap md:flex-wrap content-start overflow-x-auto md:overflow-y-auto md:overflow-x-hidden thin-scrollbar text-[1.1em] ">
       {movesList.map((move, i) => {
         const isWhiteMove = i % 2 === 0;
 
