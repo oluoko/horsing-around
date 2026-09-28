@@ -3,7 +3,7 @@
 import { useBoardContext } from "@/context/board-context";
 import { GameState } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import IconMove from "./icon-move";
+import IconMove from "@/components/control/icon-move";
 
 export default function MovesList() {
   const { boardState } = useBoardContext() as {

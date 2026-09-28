@@ -1,17 +1,17 @@
 import {
-  ChessBishop,
-  ChessQueen,
-  ChessKing,
-  ChessKnight,
-  ChessRook,
-} from "lucide-react";
+  FaChessBishop,
+  FaChessKing,
+  FaChessKnight,
+  FaChessQueen,
+  FaChessRook,
+} from "react-icons/fa6";
 
 const pieceIcons: Record<string, React.ComponentType<{ size?: number }>> = {
-  K: ChessKing,
-  Q: ChessQueen,
-  R: ChessRook,
-  B: ChessBishop,
-  N: ChessKnight,
+  K: FaChessKing,
+  Q: FaChessQueen,
+  R: FaChessRook,
+  B: FaChessBishop,
+  N: FaChessKnight,
 };
 
 export default function IconMove({ move }: { move: string }) {
